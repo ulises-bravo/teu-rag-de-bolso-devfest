@@ -12,13 +12,6 @@ constrói uma por vez:
 | **v1** — *Retrieval* | acha o documento mais parecido com a pergunta | esta branch (`main`) |
 | **v2** — *+ Generation* | entrega o documento a um LLM, que responde como a vendedora Dani, no Telegram | branch `v2` |
 
-Esta branch é a **v1**: encontra o documento e devolve o texto dele. Não há
-geração por LLM ainda. Para a v2, depois do workshop:
-
-```bash
-git checkout v2
-```
-
 Mesmo na v1 você precisa instalar o Ollama em casa (passo 2 abaixo) — ele só é
 usado na v2, mas é o download mais pesado e não dá para deixar para a hora.
 
