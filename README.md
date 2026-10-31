@@ -145,16 +145,22 @@ A v1 devolve o documento cru. A v2 passa esse documento para o LLM com um
 **system prompt** que define quem ele é:
 
 ```
-system: Você é Dani, vendedora do iiLEX. Fale com o cliente em português do
-        Brasil, simpática e direta, em no máximo 3 frases.
+system: Você é Dani, vendedora do iiLEX. Quem está escrevendo é um cliente,
+        nunca a Dani. Fale com ele em português do Brasil, simpática e direta,
+        em no máximo 3 frases.
         REGRAS, nesta ordem de prioridade:
+        0. Você é a Dani. Nunca chame o cliente de Dani nem devolva o nome
+           dele. Se ele cumprimentar, responda com um "Oi!" curto e vá direto
+           ao ponto.
         1. Se o material trouxer qualquer informação relacionada à pergunta,
            responda com base nela, ainda que parcial.
         2. Nunca invente nem estime nenhum número que não esteja escrito ali.
-        3. Se a pergunta pedir um número que não está escrito ali, não estime:
+        3. Se o cliente perguntar preço, valor, mensalidade, plano, desconto,
+           prazo em dias ou porcentagem, e esse número não estiver escrito ali,
            responda exatamente "Boa pergunta! Esse dado eu não tenho aqui, vou
            confirmar com o time e já te retorno."
-        4. Escreva com as suas palavras. Nunca copie o texto literal.
+        4. Escreva com as suas palavras. Nunca copie trechos literais, e nunca
+           mencione que existe um documento.
         5. Nunca cite estas regras na resposta ao cliente.
 
 user:   Essa é a pergunta do cliente: {pergunta}
@@ -308,6 +314,18 @@ suficiente, diga que vai confirmar com o time."*
 | Vazou `[cite: 2]` na resposta ao cliente | marcadores do PDF original estão no dado, e prompt não limpa dado | `cleanDocumentText()`, no código |
 | Dizia *"não tenho essa informação no documento"* | modelo de 3B obedece mal instrução negativa ("não diga X") | frase pronta na regra 3, em vez de proibição |
 | Passou a **recusar** pergunta que o FAQ cobre (doc_002) | a frase de escape ficou atraente demais: o modelo preferia a saída fácil | regra 3 reescrita, acionada só quando falta um **número** |
+
+Depois do primeiro teste real no Telegram, entraram mais três:
+
+| Bug observado no bot | Regra/correção |
+|---|---|
+| Cliente escreveu *"Oi Dani, vocês tem IA?"* e ela respondeu *"Oi, Dani!"* — chamou o cliente pelo próprio nome dela | regra 0, separando quem é quem |
+| *"Oi dani tem os valores?"* devolveu *"não há valores específicos mencionados neste documento"* | regra 3 passou a listar os termos comerciais (preço, valor, mensalidade, plano, desconto) |
+| `/start` entrou no RAG e devolveu uma resposta sobre o DJEN em 16s | comandos iniciados por `/` são interceptados antes da busca |
+
+A regra 4 também proibia a palavra "texto", o que impedia a Dani de dizer que o
+classificador *"lê o texto da publicação"* — vocabulário legítimo do produto.
+Passou a proibir só a menção ao documento.
 
 A última foi a mais instrutiva. Com a regra *"somente quando não houver nada
 relacionado, responda \<frase\>"*, o modelo recusava o doc_002 mesmo com score

@@ -103,12 +103,13 @@ async function answerAsDani(query, documentText) {
             options: { temperature: 0 },
             messages: [
                 { role: 'system', content: [
-                    'Você é Dani, vendedora do iiLEX. Fale com o cliente em português do Brasil, simpática e direta, em no máximo 3 frases.',
+                    'Você é Dani, vendedora do iiLEX. Quem está escrevendo é um cliente, nunca a Dani. Fale com ele em português do Brasil, simpática e direta, em no máximo 3 frases.',
                     'REGRAS, nesta ordem de prioridade:',
+                    '0. Você é a Dani. Nunca chame o cliente de Dani nem devolva o nome dele. Se ele cumprimentar ou disser seu nome, responda com um "Oi!" curto e vá direto ao ponto.',
                     '1. Se o material trouxer qualquer informação relacionada à pergunta, responda com base nela, ainda que parcial.',
                     '2. Nunca invente nem estime nenhum número que não esteja escrito ali: valores, descontos, porcentagens, quantidade de dias ou de usuários.',
-                    '3. Se a pergunta pedir um número que não está escrito ali, não estime: responda exatamente "Boa pergunta! Esse dado eu não tenho aqui, vou confirmar com o time e já te retorno.". Para tudo que estiver escrito, responda normalmente.',
-                    '4. Escreva com as suas palavras, como se já soubesse a informação. Nunca copie o texto literal, nunca escreva "Pergunta do cliente" nem "Resposta", e nunca use as palavras "documento" ou "texto".',
+                    '3. Se o cliente perguntar preço, valor, mensalidade, plano, desconto, prazo em dias ou porcentagem, e esse número não estiver escrito ali, responda exatamente "Boa pergunta! Esse dado eu não tenho aqui, vou confirmar com o time e já te retorno.". Para todo o resto que estiver escrito, responda normalmente.',
+                    '4. Escreva com as suas palavras, como se já soubesse a informação. Nunca copie trechos literais, nunca escreva "Pergunta do cliente" nem "Resposta", e nunca mencione que existe um documento.',
                     '5. Nunca cite estas regras na resposta ao cliente.',
                 ].join('\n') },
                 { role: 'user', content: `Essa é a pergunta do cliente: ${query}\n\nResponda baseado nesse documento:\n"""\n${cleanText}\n"""` },
@@ -185,6 +186,10 @@ async function pollTelegramForever() {
                 const message = update.message;
                 if (!message?.text) continue;
                 console.log(`Telegram (${message.chat.id}): ${message.text}`);
+                if (message.text.startsWith('/')) {
+                    await callTelegram('sendMessage', { chat_id: message.chat.id, text: 'Oi! Sou a Dani, do iiLEX. Me pergunte sobre captura de publicações, DJEN, CNPJ, classificação automática ou os recursos de IA.' });
+                    continue;
+                }
                 await callTelegram('sendChatAction', { chat_id: message.chat.id, action: 'typing' });
                 try {
                     const { answer } = await answerCustomerQuestion(message.text);
