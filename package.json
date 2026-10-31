@@ -1,0 +1,17 @@
+{
+  "name": "rag-teste1",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "node faq-rag-v1-http-server.mjs",
+    "prepare-model": "sh prepare-model.sh"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "dependencies": {
+    "@huggingface/transformers": "^4.3.2"
+  }
+}
