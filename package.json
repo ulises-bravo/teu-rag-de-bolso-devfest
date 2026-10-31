@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "start": "node faq-rag-v1-http-server.mjs",
-    "prepare-model": "sh prepare-model.sh"
+    "prepare-model": "sh prepare-model.sh",
+    "start:v2": "node faq-rag-v2-telegram-bot.mjs"
   },
   "keywords": [],
   "author": "",
