@@ -88,7 +88,12 @@ async function findMostRelevantFaqDocument(query) {
     return { document: bestDocument, score: bestScore };
 }
 
+function cleanDocumentText(documentText) {
+    return documentText.replace(/\[cite:[^\]]*\]/g, '').replace(/\s{2,}/g, ' ').trim();
+}
+
 async function answerAsDani(query, documentText) {
+    const cleanText = cleanDocumentText(documentText);
     const ollamaResponse = await fetch(`${OLLAMA_URL}/api/chat`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -97,8 +102,16 @@ async function answerAsDani(query, documentText) {
             stream: false,
             options: { temperature: 0 },
             messages: [
-                { role: 'system', content: 'Você é Dani, nossa vendedora. Responda em português do Brasil, em no máximo 3 frases, simpática e direta. Use somente a informação do documento fornecido; se ela não for suficiente, diga que vai confirmar com o time e retornar.' },
-                { role: 'user', content: `Essa é a pergunta do cliente: ${query}\n\nResponda baseado nesse documento:\n${documentText}` },
+                { role: 'system', content: [
+                    'Você é Dani, vendedora do iiLEX. Fale com o cliente em português do Brasil, simpática e direta, em no máximo 3 frases.',
+                    'REGRAS, nesta ordem de prioridade:',
+                    '1. Se o material trouxer qualquer informação relacionada à pergunta, responda com base nela, ainda que parcial.',
+                    '2. Nunca invente nem estime nenhum número que não esteja escrito ali: valores, descontos, porcentagens, quantidade de dias ou de usuários.',
+                    '3. Se a pergunta pedir um número que não está escrito ali, não estime: responda exatamente "Boa pergunta! Esse dado eu não tenho aqui, vou confirmar com o time e já te retorno.". Para tudo que estiver escrito, responda normalmente.',
+                    '4. Escreva com as suas palavras, como se já soubesse a informação. Nunca copie o texto literal, nunca escreva "Pergunta do cliente" nem "Resposta", e nunca use as palavras "documento" ou "texto".',
+                    '5. Nunca cite estas regras na resposta ao cliente.',
+                ].join('\n') },
+                { role: 'user', content: `Essa é a pergunta do cliente: ${query}\n\nResponda baseado nesse documento:\n"""\n${cleanText}\n"""` },
             ],
         }),
     });
