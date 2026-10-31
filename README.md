@@ -29,23 +29,60 @@ Se der menos que `v18`, instale pelo [nodejs.org](https://nodejs.org).
 
 ### 0.2 — Instalar o Ollama
 
-O Ollama é quem roda o LLM na sua máquina. Linux:
+O Ollama é quem roda o LLM na sua máquina. Escolha **um** caminho:
+
+| Ambiente | Comando |
+|---|---|
+| **macOS / Linux (Homebrew)** | `brew install ollama` |
+| **Arch, Manjaro, EndeavourOS** | `sudo pacman -S ollama` |
+| **Windows (winget)** | `winget install Ollama.Ollama` |
+| **Linux (qualquer distro)** | `curl -fsSL https://ollama.com/install.sh \| sh` |
+| **macOS / Windows (app)** | baixe em [ollama.com/download](https://ollama.com/download) |
+
+```bash
+brew install ollama
+```
+
+```bash
+sudo pacman -S ollama
+```
+
+```bash
+winget install Ollama.Ollama
+```
 
 ```bash
 curl -fsSL https://ollama.com/install.sh | sh
 ```
 
-No **macOS** ou **Windows**, baixe o instalador em
-[ollama.com/download](https://ollama.com/download).
+> **Dois caminhos que NÃO funcionam**, e aparecem em tutoriais por aí:
+> - `npm install ollama` instala a **biblioteca JavaScript** de cliente, não o
+>   servidor. Você acaba com um pacote que não tem o que chamar.
+> - `apt install ollama` não existe: não há pacote oficial para Debian/Ubuntu.
+>   O `install.sh` baixa um tarball; o `apt` que aparece dentro dele é só para
+>   o `zstd` e para drivers da NVIDIA.
+>
+> No Arch, o `yay -S ollama` também funciona, mas é desnecessário: o pacote
+> está no repositório oficial `extra`, então o `pacman` resolve.
 
-Confira que subiu:
+### Subir o serviço
+
+O Homebrew e o pacman **não** iniciam o serviço sozinhos:
+
+```bash
+ollama serve
+```
+
+Com o instalador `curl`, o app do macOS ou o winget, ele já sobe como serviço.
+
+### Confirmar que está no ar
 
 ```bash
 curl http://localhost:11434/api/tags
 ```
 
 Tem que responder um JSON (mesmo que com a lista de modelos vazia). Se der
-`Connection refused`, o serviço não está no ar — veja *Problemas comuns*.
+`Connection refused`, o serviço não está rodando — veja *Problemas comuns*.
 
 ### 0.3 — Baixar o modelo de geração
 
@@ -339,6 +376,17 @@ busca **ou** na geração. Sempre olhe o `score` e o documento escolhido antes d
 culpar o prompt — e vice-versa.
 
 ## Problemas comuns
+
+**`Connection refused` no `curl http://localhost:11434/api/tags`**
+O serviço do Ollama não está rodando. Quem instalou por **Homebrew** ou
+**pacman** precisa subir à mão:
+
+```bash
+ollama serve
+```
+
+Deixe esse terminal aberto. Com o instalador `curl`, o app do macOS ou o
+winget, o serviço sobe sozinho no boot.
 
 **`Ollama respondeu 404` ou `fetch failed` na v2**
 O Ollama não está no ar, ou o modelo não foi baixado. Confira os dois:
