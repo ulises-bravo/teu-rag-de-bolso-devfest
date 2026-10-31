@@ -1,3 +1,4 @@
 node_modules/
 faq-rag-v1-http-server.comentado.mjs
 faq-rag-v2-telegram-bot.comentado.mjs
+.env
